@@ -1,0 +1,2 @@
+[console_scripts]
+arena = scripts.arena_cli:cli

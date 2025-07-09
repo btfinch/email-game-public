@@ -1,0 +1,59 @@
+{
+  "session_id": "arena_1752002853",
+  "agents": [
+    "alice",
+    "bob",
+    "charlie",
+    "diana"
+  ],
+  "started_at": "2025-07-08T15:27:33.531919",
+  "total_rounds": 1,
+  "rounds": [
+    {
+      "round_number": 1,
+      "status": "starting",
+      "request_lists": {
+        "alice": [
+          "charlie",
+          "diana"
+        ],
+        "bob": [
+          "alice",
+          "charlie"
+        ],
+        "charlie": [
+          "bob",
+          "diana"
+        ],
+        "diana": [
+          "alice",
+          "bob"
+        ]
+      },
+      "signing_permissions": {
+        "alice": [
+          "bob",
+          "diana"
+        ],
+        "bob": [
+          "charlie",
+          "diana"
+        ],
+        "charlie": [
+          "alice",
+          "bob"
+        ],
+        "diana": [
+          "alice",
+          "charlie"
+        ]
+      }
+    }
+  ],
+  "cumulative_scores": {
+    "alice": 0,
+    "bob": 0,
+    "charlie": 0,
+    "diana": 0
+  }
+}

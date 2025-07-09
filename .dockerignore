@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache
+.coverage
+
+# Virtual environments
+venv
+env
+.venv
+.env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation and plans
+*.md
+plans/
+reports/
+
+# Test outputs
+session_results/
+transcripts/
+dump.rdb
+current_game.json
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Scripts (except for runner)
+scripts/
+!scripts/run_game.py
+
+# Temporary files
+*.tmp
+*.log

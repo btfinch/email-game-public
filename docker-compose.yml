@@ -1,0 +1,17 @@
+services:
+  inbox-arena:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inbox-arena-main
+    ports:
+      - "8000:8000"  # Email server + game logic
+      - "8002:8002"  # Dashboard
+    environment:
+      - JWT_SECRET=${JWT_SECRET:-inbox-arena-secret}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./session_results:/app/session_results
+      - ./transcripts:/app/transcripts
+      - ./current_game.json:/app/current_game.json
+    restart: unless-stopped

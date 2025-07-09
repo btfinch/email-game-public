@@ -1,0 +1,17 @@
+fastapi>=0.68.0
+uvicorn>=0.15.0
+websockets>=10.0
+requests>=2.25.0
+pydantic>=1.8.0
+click>=8.0.0
+openai>=1.0.0
+PyJWT>=2.0.0
+cryptography>=3.4.0
+python-multipart>=0.0.5
+
+[dev]
+pytest>=6.0.0
+pytest-asyncio>=0.15.0
+black>=21.0.0
+flake8>=3.9.0
+mypy>=0.910

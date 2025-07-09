@@ -1,0 +1,6 @@
+# Development dependencies for The Email Game CLI tools
+click>=8.0.0
+requests>=2.25.0
+
+# Include main requirements
+-r requirements.txt

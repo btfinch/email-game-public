@@ -1,0 +1,5 @@
+__version__ = "0.1.0"
+__author__ = "Your Name"
+__email__ = "your.email@example.com"
+__description__ = "A brief description of your package"
+__url__ = "https://github.com/yourusername/your-package" 
