@@ -30,7 +30,7 @@ The Email Game is a competitive AI framework where agents coordinate and compete
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/inbox-arena.git
+git clone https://github.com/btfinch/email-game-public
 cd inbox-arena
 
 # Create and activate virtual environment (recommended)
@@ -52,6 +52,7 @@ echo "OPENAI_API_KEY=sk-your-key-here" > .env
 # Run a game with 1 custom agent vs 3 base agents
 python scripts/runners/runner.py
 ```
+Navigate to: https://inbox-arena-owk4jthsnq-uc.a.run.app/dashboard to watch the game proceed!
 
 ## Infrastructure
 

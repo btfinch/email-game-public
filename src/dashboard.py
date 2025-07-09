@@ -87,8 +87,27 @@ class Dashboard:
             if response.status_code == 200:
                 results = response.json()
                 if results.get('success') and results.get('files'):
-                    # Return latest 5 games
-                    return results['files'][:5]
+                    # Get latest 5 games
+                    games = results['files'][:5]
+                    # Fetch actual game data for each
+                    game_data = []
+                    for game in games:
+                        try:
+                            game_response = requests.get(f"{self.email_server_url}/session_results/{game['filename']}", timeout=5)
+                            if game_response.status_code == 200:
+                                game_result = game_response.json()
+                                if game_result.get('success') and game_result.get('data'):
+                                    game_info = {
+                                        'filename': game['filename'],
+                                        'modified': game['modified'],
+                                        'data': game_result['data']
+                                    }
+                                    game_data.append(game_info)
+                        except Exception as e:
+                            print(f"Error fetching game data for {game['filename']}: {e}")
+                            # Fall back to just filename
+                            game_data.append(game)
+                    return game_data
         except Exception as e:
             print(f"Error getting recent games: {e}")
         
