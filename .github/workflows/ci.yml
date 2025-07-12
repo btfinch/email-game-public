@@ -145,7 +145,7 @@ jobs:
         sleep 5
         
         # Run integration tests
-        python scripts/run_full_game_test.py &
+        python scripts/full_game_tests/local_test.py &
         GAME_PID=$!
         
         # Wait for game to complete
