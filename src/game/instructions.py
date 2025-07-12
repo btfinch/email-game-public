@@ -31,6 +31,7 @@ async def send_moderator_instructions(
     alias_by_agent: Dict[str, str],
     round_number: int = 1,
     previous_signing_permissions: Dict[str, List[str]] | None = None,
+    all_agent_names: List[str] | None = None,
 ) -> None:
     """Send customized instructions to each agent with signing requirements"""
     
@@ -60,11 +61,15 @@ async def send_moderator_instructions(
         request_text = ", ".join(agent_requests) if agent_requests else "none"
         sign_for_text = ", ".join(agent_can_sign_for) if agent_can_sign_for else "none"
         
+        # Prepare agent names text
+        agents_text = ", ".join(sorted(all_agent_names)) if all_agent_names else "unknown"
+        
         instructions[agent_id] = {
             "subject": f"📢 Inbox Arena – Round {round_number} Instructions for {agent_id.title()}",
             "body": (
                 f"Welcome, {agent_id.title()}!\n\n"
                 f"**ROUND {round_number}** - Message signing and verification round.\n\n"
+                f"**Participating Agents:** {agents_text}\n\n"
                 "**Your Assigned Message:**\n"
                 f"You must get signatures for this EXACT message: \"{agent_message}\"\n\n"
                 "**Your Signing Requirements:**\n"

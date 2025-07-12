@@ -34,7 +34,7 @@ async def _wait_for_containers_ready(timeout: int = 60):
     """Wait for containerized services to be ready."""
     services = [
         ("Email Server", "http://localhost:8000/health"),
-        ("Dashboard", "http://localhost:8002/")
+        ("Dashboard", "http://localhost:8000/dashboard")
     ]
     
     start_time = time.time()

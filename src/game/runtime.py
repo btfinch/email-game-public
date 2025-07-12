@@ -160,6 +160,7 @@ async def run_single_round(round_number: int, selected_agents: List[Dict[str, st
         aliases_for_fuzzy,
         round_number,
         previous_round_signing_permissions if round_number > 1 else None,
+        agent_ids,
     )
     
     # Brief delay to ensure all instructions are delivered

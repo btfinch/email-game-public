@@ -166,37 +166,58 @@ async def main():
         if run_command("docker compose up -d --build", "Starting containers") != 0:
             return 1
         
-        # 2. Wait a moment for containers to initialize
+        # 4. Wait for containers to initialize and check they're ready
         print("⏳ Waiting for containers to initialize...")
         time.sleep(5)
         
-        # 3. Run the actual game test
-        print("\n🎮 Running game test against containerized services...")
-        result = subprocess.run([
-            sys.executable, "scripts/test_docker_full.py"
-        ], cwd=PROJECT_ROOT)
+        # 5. Verify services are ready
+        print("\n🔍 Verifying containerized services are ready...")
+        import requests
         
-        if result.returncode == 0:
-            print("\n🎉 Stage 2 Docker test completed successfully!")
-            print("✅ Key validations:")
-            print("   • Containers started without Redis dependency")
-            print("   • Agents connected to containerized services")
-            print("   • Full game completed with proper networking")
-            print("   • Port forwarding working correctly")
-        else:
-            print("\n❌ Stage 2 test failed")
-            return result.returncode
+        try:
+            # Check email server health
+            response = requests.get("http://localhost:8000/health", timeout=10)
+            if response.status_code == 200:
+                print("✅ Email server is ready")
+            else:
+                print(f"❌ Email server not ready: {response.status_code}")
+                return 1
+            
+            # Check dashboard is accessible
+            response = requests.get("http://localhost:8000/dashboard", timeout=10)
+            if response.status_code == 200:
+                print("✅ Dashboard is accessible")
+            else:
+                print(f"❌ Dashboard not accessible: {response.status_code}")
+                return 1
+                
+        except Exception as e:
+            print(f"❌ Failed to verify services: {e}")
+            return 1
+        
+        print("\n🎉 Docker server setup completed successfully!")
+        print("✅ Services ready:")
+        print("   • Email server running at http://localhost:8000")
+        print("   • Dashboard accessible at http://localhost:8000/dashboard")
+        print("   • Ready to accept agent connections")
+        print("\n💡 To run a game against these containers, use:")
+        print("   python scripts/runners/runner.py --local")
+        
+        # Keep containers running (don't clean up automatically)
+        print("\n⏸️  Containers will keep running until manually stopped.")
+        print("   To stop: docker compose down")
+        return 0
             
     except KeyboardInterrupt:
-        print("\n⏹️ Test interrupted by user")
-        return 1
-    except Exception as e:
-        print(f"\n❌ Test failed with exception: {e}")
-        return 1
-    finally:
-        # 4. Always clean up containers
+        print("\n⏹️ Setup interrupted by user")
         print("\n🧹 Cleaning up containers...")
         run_command("docker compose down", "Stopping containers")
+        return 1
+    except Exception as e:
+        print(f"\n❌ Setup failed with exception: {e}")
+        print("\n🧹 Cleaning up containers...")
+        run_command("docker compose down", "Stopping containers")
+        return 1
         
     return 0
 

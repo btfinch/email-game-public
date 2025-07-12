@@ -153,19 +153,31 @@ async def cleanup_agent_processes(processes):
 
 
 async def main():
-    """Run the production test with 4 local agents (1 custom + 3 base)."""
+    """Run the test with 4 local agents (1 custom + 3 base)."""
     
     # Load environment variables from .env file
     load_dotenv()
     
-    # Get server URL from command line or use default
-    if len(sys.argv) < 2:
-        server_url = "https://inbox-arena-owk4jthsnq-uc.a.run.app"
-        print(f"No server URL provided, using default: {server_url}")
-    else:
-        server_url = sys.argv[1].rstrip('/')
+    # Parse command line arguments
+    local_mode = False
+    server_url = None
     
-    print("🎮 Production Test: 4 Local Agents (1 Custom + 3 Base)")
+    for arg in sys.argv[1:]:
+        if arg == "--local":
+            local_mode = True
+        elif not arg.startswith("--"):
+            server_url = arg.rstrip('/')
+    
+    # Set server URL based on mode
+    if local_mode:
+        server_url = "http://localhost:8000"
+        test_mode = "Local Docker"
+    else:
+        if server_url is None:
+            server_url = "https://inbox-arena-owk4jthsnq-uc.a.run.app"
+        test_mode = "Production"
+    
+    print(f"🎮 {test_mode} Test: 4 Local Agents (1 Custom + 3 Base)")
     print("=" * 50)
     print(f"🌐 Server URL: {server_url}")
     print(f"🔑 OpenAI API Key: {'✅ Set' if os.getenv('OPENAI_API_KEY') else '❌ Missing'}")
@@ -232,9 +244,13 @@ async def main():
         print("=" * 50)
         
         if result_file:
-            print("\n🎉 Production test completed successfully!")
+            print(f"\n🎉 {test_mode} test completed successfully!")
             print("✅ Key validations:")
-            print("   • Local agents connected to production server")
+            if local_mode:
+                print("   • Local agents connected to Docker containers")
+                print("   • Containerized server handling game orchestration")
+            else:
+                print("   • Local agents connected to production server")
             print("   • Agents successfully registered and joined queue")
             print("   • Game auto-started with 4 agents") 
             print("   • Full game completed with results")
