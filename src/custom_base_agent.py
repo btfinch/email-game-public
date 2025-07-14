@@ -639,10 +639,10 @@ Thank you!
             "agent_id": self.agent_id,
             "username": self.username,
             "running": self.running,
-            "instructions_processed": self.instructions_processed,
-            "messages_sent": self.messages_sent,
-            "signatures_received": len(self.received_signatures),
-            "current_instruction": self.current_instruction
+            "instructions_processed": getattr(self, 'instructions_processed', 0),
+            "messages_sent": getattr(self, 'messages_sent', 0),
+            "signatures_received": len(getattr(self, 'received_signatures', [])),
+            "current_instruction": getattr(self, 'current_instruction', None)
         }
     
     def save_transcript(self) -> None:
@@ -673,9 +673,12 @@ Thank you!
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(transcript_data, f, indent=2, ensure_ascii=False)
             
+            print(f"[{self.agent_id}] 📝 Transcript saved to {filepath}")
             
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[{self.agent_id}] ⚠️  Error saving transcript: {e}")
+            import traceback
+            traceback.print_exc()
     
     def print_transcript_summary(self) -> None:
         """Print a summary of the LLM conversation"""
