@@ -74,3 +74,114 @@ To build a custom agent:
 # After modifying your agent, test it
 python scripts/runners/runner.py
 ```
+## Codebase organization guide for LLMs:
+
+- Main game code is stored under src/main
+
+## Guide for New Engineers
+
+### Understanding the Architecture
+
+The Email Game is a multi-agent competition framework where LLM-powered agents communicate via email to exchange cryptographic signatures. Here's what you need to know:
+
+#### Core Components
+
+1. **Email Server** (`src/email_server.py`)
+   - Central hub handling all agent communication
+   - Provides REST API endpoints and WebSocket connections
+   - Manages authentication, message routing, and game orchestration
+   - Runs on port 8000 (includes integrated dashboard)
+
+2. **Base Agent** (`src/base_agent.py`)
+   - Template for all agents - connects to email server via WebSocket
+   - Receives emails → forwards to LLM → executes tool calls
+   - Handles JWT authentication and message deduplication
+   - See `src/custom_base_agent.py` for customization examples
+
+3. **LLM Driver** (`src/llm_driver.py`)
+   - Interfaces with OpenAI API (GPT-4o by default)
+   - Manages conversation context and tool calling
+   - Available tools: send_email, sign_and_respond, submit_signature
+
+4. **Game Runtime** (`src/game/runtime.py`)
+   - Orchestrates game rounds and timing
+   - Generates balanced signature request/authorization assignments
+   - Handles scoring and multi-round complexity
+
+#### Game Flow
+
+1. **Registration**: Agents register with RSA public keys, receive JWT tokens
+2. **Queue**: Agents join waiting queue via WebSocket
+3. **Auto-start**: Game begins when 4 agents are ready
+4. **Rounds**: Each round (60s default):
+   - Agents receive unique messages to sign
+   - Instructions specify who to request signatures from/provide to
+   - Points awarded for successful signature submissions
+5. **Results**: Session data saved with scores and transcripts
+
+#### Testing & Development
+
+```bash
+# Local development (all components locally)
+python scripts/full_game_tests/local_test.py
+
+# Docker testing (server in container, agents local)
+python scripts/full_game_tests/docker-test.py
+
+# Production testing (connect to deployed server)
+python scripts/full_game_tests/deployed-test.py
+
+# Run your custom agent against production
+python scripts/runners/runner.py
+```
+
+#### Key Files to Explore
+
+- `docs/agent_prompt.md` - System prompt explaining game rules to LLM
+- `src/game/config.py` - Game configuration (rounds, timing, etc.)
+- `data/sample_agents.json` - Pre-generated agent identities for testing
+- `src/dashboard.py` - Web UI for monitoring games (integrated into server)
+
+#### Common Tasks
+
+**Creating a Custom Agent:**
+1. Copy `src/custom_llm_driver.py`
+2. Modify the `on_email()` method (line 148) with your strategy
+3. Test with `python scripts/runners/runner.py`
+
+**Running a Local Game:**
+```bash
+# Terminal 1: Start server
+python -m src.email_server
+
+# Terminal 2: Start dashboard (if using standalone)
+python -m src.dashboard
+
+# Terminal 3: Run automated game
+python -m scripts.live_agent_demo
+```
+
+**Debugging:**
+- Agent transcripts saved in `agent_transcripts/`
+- Session results in `session_results/`
+- Enable debug logging with environment variables
+- Use dashboard (http://localhost:8000/dashboard) to watch message flow
+
+#### Architecture Decisions
+
+- **WebSocket + REST**: Real-time delivery via WebSocket, actions via REST
+- **JWT Auth**: Stateless authentication with automatic refresh
+- **In-memory Storage**: No external dependencies (Redis, etc.)
+- **Unified Server**: Email + game logic in single service
+- **RSA Signatures**: Cryptographic proof of message authenticity
+
+#### Tips for New Engineers
+
+1. Start by running `scripts/runners/runner.py` to see a full game
+2. Read `docs/agent_prompt.md` to understand game rules
+3. Watch the dashboard during games to see message patterns
+4. Check agent transcripts to debug behavior
+5. The game is about following instructions precisely - agents must track who they can/cannot share signatures with
+6. Multi-round games add complexity with "fuzzy descriptions" instead of explicit names
+
+Remember: The game tests agents' ability to interpret instructions, manage state, and coordinate through asynchronous communication. Success requires both following rules precisely and strategic thinking about when/how to communicate.

@@ -1,17 +1,107 @@
 {
-  "session_id": "arena_1752002853",
+  "session_id": "arena_1752523463",
   "agents": [
     "alice",
     "bob",
     "charlie",
     "diana"
   ],
-  "started_at": "2025-07-08T15:27:33.531919",
+  "started_at": "2025-07-14T20:04:23.827429",
   "total_rounds": 1,
   "rounds": [
     {
       "round_number": 1,
-      "status": "starting",
+      "status": "completed",
+      "agent_scores": {
+        "alice": 4,
+        "bob": 3,
+        "charlie": 3,
+        "diana": 4
+      },
+      "agent_performance": {
+        "alice": {
+          "supposed_to_request_from": [
+            "charlie",
+            "diana"
+          ],
+          "successfully_submitted_for": [
+            "charlie",
+            "diana"
+          ],
+          "authorized_to_sign_for": [
+            "bob",
+            "diana"
+          ],
+          "successfully_signed_for": [
+            "bob",
+            "diana"
+          ],
+          "submission_points": 2,
+          "signing_points": 2,
+          "unauthorized_signing_penalties": 0
+        },
+        "bob": {
+          "supposed_to_request_from": [
+            "alice",
+            "charlie"
+          ],
+          "successfully_submitted_for": [
+            "alice"
+          ],
+          "authorized_to_sign_for": [
+            "charlie",
+            "diana"
+          ],
+          "successfully_signed_for": [
+            "charlie",
+            "diana"
+          ],
+          "submission_points": 1,
+          "signing_points": 2,
+          "unauthorized_signing_penalties": 0
+        },
+        "charlie": {
+          "supposed_to_request_from": [
+            "diana",
+            "bob"
+          ],
+          "successfully_submitted_for": [
+            "bob",
+            "diana"
+          ],
+          "authorized_to_sign_for": [
+            "alice",
+            "bob"
+          ],
+          "successfully_signed_for": [
+            "alice"
+          ],
+          "submission_points": 2,
+          "signing_points": 1,
+          "unauthorized_signing_penalties": 0
+        },
+        "diana": {
+          "supposed_to_request_from": [
+            "bob",
+            "alice"
+          ],
+          "successfully_submitted_for": [
+            "bob",
+            "alice"
+          ],
+          "authorized_to_sign_for": [
+            "alice",
+            "charlie"
+          ],
+          "successfully_signed_for": [
+            "alice",
+            "charlie"
+          ],
+          "submission_points": 2,
+          "signing_points": 2,
+          "unauthorized_signing_penalties": 0
+        }
+      },
       "request_lists": {
         "alice": [
           "charlie",
@@ -22,12 +112,12 @@
           "charlie"
         ],
         "charlie": [
-          "bob",
-          "diana"
+          "diana",
+          "bob"
         ],
         "diana": [
-          "alice",
-          "bob"
+          "bob",
+          "alice"
         ]
       },
       "signing_permissions": {
@@ -47,13 +137,14 @@
           "alice",
           "charlie"
         ]
-      }
+      },
+      "total_messages": 0
     }
   ],
   "cumulative_scores": {
-    "alice": 0,
-    "bob": 0,
-    "charlie": 0,
-    "diana": 0
+    "alice": 4,
+    "bob": 3,
+    "charlie": 3,
+    "diana": 4
   }
 }
