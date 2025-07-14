@@ -13,7 +13,15 @@ import os
 from dotenv import load_dotenv
 
 # Ensure project root is importable
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+print(f"🔍 DEBUG: Script location: {Path(__file__).resolve()}")
+print(f"🔍 DEBUG: Project root: {PROJECT_ROOT}")
+print(f"🔍 DEBUG: Project root exists: {PROJECT_ROOT.exists()}")
+print(f"🔍 DEBUG: src directory: {PROJECT_ROOT / 'src'}")
+print(f"🔍 DEBUG: src directory exists: {(PROJECT_ROOT / 'src').exists()}")
+print(f"🔍 DEBUG: custom_base_agent.py: {PROJECT_ROOT / 'src' / 'custom_base_agent.py'}")
+print(f"🔍 DEBUG: custom_base_agent.py exists: {(PROJECT_ROOT / 'src' / 'custom_base_agent.py').exists()}")
+
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -26,19 +34,46 @@ async def create_test_agent_subprocess(agent_id: str, server_url: str, use_custo
     module_name = "src.custom_base_agent" if use_custom else "src.base_agent"
     
     print(f"🤖 Starting {agent_type} agent subprocess: {agent_id}")
+    print(f"   🐍 Python executable: {sys.executable}")
+    print(f"   📁 Working directory: {PROJECT_ROOT}")
+    print(f"   📦 Module name: {module_name}")
+    
+    # Debug: Check if the module file exists
+    module_path = PROJECT_ROOT / module_name.replace(".", "/") / "__init__.py"
+    if not module_path.exists():
+        module_path = PROJECT_ROOT / (module_name.replace(".", "/") + ".py")
+    
+    print(f"   📄 Module file path: {module_path}")
+    print(f"   ✅ Module file exists: {module_path.exists()}")
+    
+    # Debug: Check Python path
+    print(f"   🛤️  Python path includes project root: {str(PROJECT_ROOT) in sys.path}")
     
     try:
-        # Start agent as subprocess so its logs flow through
+        # Start agent as subprocess - let logs flow through to terminal
         process = subprocess.Popen([
             sys.executable, "-m", module_name, 
             agent_id, agent_id.title(), server_url
         ], cwd=PROJECT_ROOT)
+        
+        # Give the process a moment to start and potentially fail
+        import time
+        time.sleep(1.0)  # Increased wait time
+        
+        # Check if process is still running
+        if process.poll() is not None:
+            print(f"❌ {agent_type.title()} agent {agent_id} failed to start (exit code: {process.returncode})")
+            print(f"   🔧 Try running manually: python -m {module_name} {agent_id} {agent_id.title()} {server_url}")
+            print(f"   🔧 Or try: cd {PROJECT_ROOT} && python -m {module_name} {agent_id} {agent_id.title()} {server_url}")
+            return None
         
         print(f"✅ {agent_type.title()} agent {agent_id} subprocess started (PID: {process.pid})")
         return process
         
     except Exception as e:
         print(f"❌ Failed to start {agent_type} agent {agent_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
