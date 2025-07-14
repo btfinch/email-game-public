@@ -8,12 +8,13 @@ import asyncio
 import sys
 import time
 import subprocess
+import json
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 
 # Ensure project root is importable
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -28,10 +29,11 @@ async def create_test_agent_subprocess(agent_id: str, server_url: str, use_custo
     print(f"🤖 Starting {agent_type} agent subprocess: {agent_id}")
     
     try:
-        # Start agent as subprocess so its logs flow through
+        # Start agent through wrapper for proper signal handling
+        wrapper_path = PROJECT_ROOT / "scripts" / "runners" / "agent_wrapper.py"
         process = subprocess.Popen([
-            sys.executable, "-m", module_name, 
-            agent_id, agent_id.title(), server_url
+            sys.executable, str(wrapper_path), 
+            module_name, agent_id, agent_id.title(), server_url
         ], cwd=PROJECT_ROOT)
         
         print(f"✅ {agent_type.title()} agent {agent_id} subprocess started (PID: {process.pid})")
@@ -132,17 +134,30 @@ async def monitor_game_progress(server_url: str, timeout: int = 300):
 
 
 async def cleanup_agent_processes(processes):
-    """Clean up agent subprocesses."""
-    print("🧹 Cleaning up agent processes...")
+    """Clean up agent subprocesses with graceful shutdown."""
+    print("🧹 Cleaning up agent processes (graceful shutdown)...")
+    
+    # First, send SIGTERM to all processes to trigger graceful shutdown
     for process in processes:
-        if process:
+        if process and process.poll() is None:  # Check if still running
             try:
-                print(f"  💀 Terminating process PID {process.pid}")
-                process.terminate()
-                
-                # Wait up to 5 seconds for graceful shutdown
+                print(f"  📡 Sending SIGTERM to PID {process.pid} for graceful shutdown...")
+                process.terminate()  # This sends SIGTERM, which our wrapper handles
+            except Exception as e:
+                print(f"⚠️  Error sending signal to process: {e}")
+    
+    # Wait for all processes to shut down gracefully
+    print("  ⏳ Waiting for agents to save transcripts and disconnect...")
+    await asyncio.sleep(3)  # Give agents time to save transcripts
+    
+    # Now check if any processes need force killing
+    for process in processes:
+        if process and process.poll() is None:  # Still running after grace period
+            try:
+                print(f"  ⚠️  Process PID {process.pid} didn't stop gracefully")
+                # Wait a bit more with timeout
                 try:
-                    process.wait(timeout=5)
+                    process.wait(timeout=2)
                 except subprocess.TimeoutExpired:
                     print(f"  💥 Force killing PID {process.pid}")
                     process.kill()
@@ -150,6 +165,8 @@ async def cleanup_agent_processes(processes):
                     
             except Exception as e:
                 print(f"⚠️  Error cleaning up process: {e}")
+    
+    print("  ✅ Agent cleanup completed")
 
 
 async def main():
@@ -260,6 +277,20 @@ async def main():
                 print(f"   • Session results retrieved: {result_file['filename']}")
                 session_data = result_file['data']
                 
+                # Save a local copy if running against remote server
+                if not local_mode:
+                    try:
+                        local_session_dir = PROJECT_ROOT / "session_results"
+                        local_session_dir.mkdir(exist_ok=True)
+                        local_filepath = local_session_dir / result_file['filename']
+                        
+                        with open(local_filepath, 'w') as f:
+                            json.dump(session_data, f, indent=2)
+                        
+                        print(f"   • Local copy saved: {local_filepath}")
+                    except Exception as e:
+                        print(f"   ⚠️  Failed to save local copy: {e}")
+                
                 # Display final scores and winner
                 if 'cumulative_scores' in session_data:
                     print("\n🏆 Final Scores:")
@@ -304,6 +335,13 @@ async def main():
         # Always clean up agent processes
         await cleanup_agent_processes(agent_processes)
         print(f"⏱️  Total test time: {time.time() - test_start_time:.1f}s")
+        
+        # Remind about transcripts
+        transcript_dir = PROJECT_ROOT / "transcripts"
+        if transcript_dir.exists():
+            transcript_count = len(list(transcript_dir.glob("*.json")))
+            print(f"📝 Agent transcripts saved in: {transcript_dir}")
+            print(f"   ({transcript_count} transcript files found)")
 
 
 if __name__ == "__main__":
