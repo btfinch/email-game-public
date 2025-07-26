@@ -12,4 +12,5 @@ plans/
 
 # Game transcripts and test outputs
 transcripts/
+session_results/
 tests/
